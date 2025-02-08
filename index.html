@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Ultra SOL Trading Dashboard - Minimal & Avanzado</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Animate.css para animaciones -->
@@ -555,6 +556,41 @@
       margin-bottom: 8px;
       font-size: 1.1rem;
     }
+
+    /* Estilos para el select de moneda en el modal de balance */
+    #balanceCurrencySelect {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    #balanceCurrencySelect:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    #balanceCurrencySelect option {
+      background-color: #1a1a1a;
+      color: #fff;
+      padding: 8px;
+    }
+    
+    /* Estilo para el input group */
+    .input-group .form-control {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+    
+    .input-group .form-control:focus {
+      background-color: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: none;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -789,27 +825,33 @@
     </div>
   </div>
 
-  <!-- Balance Modal -->
-  <div class="modal fade" id="balanceModal" tabindex="-1" aria-labelledby="balanceModalLabel" aria-hidden="true">
+  <!-- Modal para establecer balance -->
+  <div class="modal fade" id="balanceModal">
     <div class="modal-dialog">
       <div class="modal-content bg-dark text-light">
         <div class="modal-header">
-          <h5 class="modal-title" id="balanceModalLabel">Establecer Balance Inicial</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          <h5 class="modal-title">Establecer Balance Inicial</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <form id="balanceForm">
             <div class="mb-3">
               <label for="balanceInput" class="form-label">
-                Ingrese el balance inicial (<span id="balanceCurrencyLabel">USD</span>)
+                Balance
               </label>
-              <input type="number" step="any" class="form-control" id="balanceInput" required>
+              <div class="input-group">
+                <input type="number" class="form-control" id="balanceInput" step="0.01" required>
+                <select id="balanceCurrencySelect" class="form-select" style="max-width: 100px;">
+                  <option value="USD">USD</option>
+                  <option value="SOL">SOL</option>
+                </select>
+              </div>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" form="balanceForm" class="btn btn-custom">Guardar</button>
+          <button type="submit" form="balanceForm" class="btn btn-primary">Guardar</button>
         </div>
       </div>
     </div>
@@ -1067,14 +1109,17 @@
 
     // Renderizar la tabla de trades con filtrado de búsqueda
     function renderTradesTable() {
-      const tradesTable = document.getElementById('tradesTable');
-      tradesTable.innerHTML = "";
-      // Ordenar por fecha
-      tradesData.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const tableBody = document.getElementById('tradesTable');
       const filterText = document.getElementById('searchTrade').value.toLowerCase();
+      
       const filteredTrades = tradesData.filter(trade => 
-        trade.coinName.toLowerCase().includes(filterText)
+        (trade.coinName || "").toLowerCase().includes(filterText)
       );
+      
+      // Ordenar los trades por fecha (más reciente primero)
+      filteredTrades.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      tableBody.innerHTML = "";
       filteredTrades.forEach(trade => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', trade.id);
@@ -1103,7 +1148,7 @@
             <button class="btn btn-sm btn-outline-light btn-delete" onclick="deleteTrade(${trade.id})">Delete</button>
           </td>
         `;
-        tradesTable.appendChild(row);
+        tableBody.appendChild(row);
       });
     }
 
@@ -1387,11 +1432,9 @@
 
     // Listener para establecer o cambiar el balance inicial mediante modal
     document.getElementById('setBalanceBtn').addEventListener('click', function() {
-      // Prellenar el input con el valor actual del balance
+      // Mostrar el balance actual en USD
       document.getElementById('balanceInput').value = initialBalance;
-      // Actualizar la etiqueta de moneda en el modal
-      document.getElementById('balanceCurrencyLabel').textContent = currentCurrency;
-      // Mostrar el modal
+      document.getElementById('balanceCurrencySelect').value = 'USD';
       new bootstrap.Modal(document.getElementById('balanceModal')).show();
     });
 
@@ -1430,8 +1473,16 @@
     document.getElementById('balanceForm').addEventListener('submit', function(e) {
       e.preventDefault();
       let newBalance = parseFloat(document.getElementById('balanceInput').value);
-      if (!isNaN(newBalance)) {
-        initialBalance = newBalance;
+      let selectedCurrency = document.getElementById('balanceCurrencySelect').value;
+      
+      if (!isNaN(newBalance) && livePrices.SOL) {
+        // Convertir el balance si es necesario
+        if (selectedCurrency === "SOL") {
+          initialBalance = newBalance * livePrices.SOL; // Convertir SOL a USD
+        } else {
+          initialBalance = newBalance;
+        }
+        
         localStorage.setItem('initialBalance', initialBalance);
         updateSummaryStats();
         updateChart();
@@ -1585,6 +1636,28 @@
         return trade;
       });
     }
+
+    // Listener para el toggle de moneda
+    document.querySelectorAll('input[name="currency"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        currentCurrency = this.value;
+        localStorage.setItem('currentCurrency', currentCurrency);
+        
+        if(baselineSeries) {
+          baselineSeries.applyOptions({
+            priceFormat: {
+              type: 'price',
+              precision: currentCurrency === 'USD' ? 2 : 4,
+              minMove: currentCurrency === 'USD' ? 0.01 : 0.0001
+            },
+          });
+        }
+        
+        updateSummaryStats();
+        renderTradesTable();
+        updateChart();
+      });
+    });
   </script>
 </body>
 </html>
