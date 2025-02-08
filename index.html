@@ -10,15 +10,18 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <!-- Google Fonts: Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Particles.js -->
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+  <!-- TradingView Lightweight Charts -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <!-- Particles.js -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <style>
     /* Global Styles */
     body {
       font-family: 'Montserrat', sans-serif;
-      background: #181818;
+      background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
       color: #e0e0e0;
       margin: 0;
       padding-bottom: 50px;
@@ -36,29 +39,82 @@
     /* Header Minimalista */
     .header {
       text-align: center;
-      padding: 70px 20px;
-      background: linear-gradient(135deg, #1b1b1b, #2e2e2e);
+      padding: 40px 20px;
+      background: rgba(255, 255, 255, 0.03);
       color: #fff;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
       margin-bottom: 50px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0 0 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header::before {
+      display: none;
+    }
+    .header::after {
+      content: '';
+      width: 150px;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent
+      );
+      margin-top: 20px;
     }
     .header h1 {
-      font-size: 3rem;
+      font-size: 2.2rem;
       margin-bottom: 10px;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      position: relative;
+      z-index: 2;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.95);
     }
-    .header p {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
+    .header h1::before,
+    .header h1::after {
+      content: '•';
+      color: rgba(255, 255, 255, 0.3);
+      margin: 0 15px;
+      font-size: 1.5rem;
+      vertical-align: middle;
     }
     .price-badge {
+      position: relative;
+      z-index: 2;
       font-size: 1.1rem;
       padding: 12px 24px;
-      background: #333;
-      border: 1px solid #555;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 25px;
       display: inline-block;
-      margin-top: 10px;
+      margin-top: 15px;
+      backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 1s ease-out;
+    }
+    .price-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     /* Efecto Glass para contenedores */
     .glass {
@@ -70,13 +126,35 @@
       padding: 30px 40px;
       margin-bottom: 40px;
       transition: background 0.3s ease, color 0.3s ease;
+      position: relative;
+    }
+    .glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      padding: 1px;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
     }
     /* Panel de Rendimiento y Estadísticas */
     .performance-summary {
       margin-bottom: 40px;
     }
     .stats-card {
-      height: 140px;
+      position: relative;
+      overflow: hidden;
+      min-height: 140px;
       padding: 25px 15px;
       border-radius: 15px;
       background: rgba(255, 255, 255, 0.08);
@@ -86,12 +164,35 @@
       color: #fff;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      justify-content: flex-start;
+      align-items: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .stats-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    .stats-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.03),
+        transparent
+      );
+      transform: rotate(45deg);
+      animation: shimmer 6s infinite linear;
+      pointer-events: none;
+    }
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%) rotate(45deg);
+      }
+      100% {
+        transform: translateX(100%) rotate(45deg);
+      }
     }
     .stats-card h4 {
       font-size: 0.9rem;
@@ -108,7 +209,7 @@
       color: #fff;
     }
     .stats-card button {
-      margin-top: 10px;
+      margin-top: auto;
       padding: 5px 15px;
       font-size: 0.8rem;
       background: transparent;
@@ -155,11 +256,25 @@
       transition: all 0.3s ease;
       border-radius: 8px;
       color: #fff;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
     }
     .btn-custom:hover {
       background: #337aa3;
-      transform: scale(1.03);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .btn-custom:active {
+      transform: translateY(1px);
+    }
+    .btn-outline-light {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .btn-outline-light:hover {
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
     }
     /* Checkbox y botón de limpiar defaults */
     .form-check-label {
@@ -184,9 +299,13 @@
     table tbody tr:nth-child(odd) {
       background: rgba(255,255,255,0.02);
     }
+    table tbody tr {
+      transition: all 0.3s ease;
+    }
     table tbody tr:hover {
       background: rgba(255, 255, 255, 0.08);
-      transition: background 0.3s ease;
+      transform: translateX(5px);
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
     }
     table td, table th {
       padding: 12px 15px;
@@ -209,6 +328,8 @@
       font-weight: 600;
       padding: 6px 12px;
       border-radius: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     .status-loss {
       background-color: rgba(244, 67, 54, 0.3);
@@ -216,6 +337,8 @@
       font-weight: 600;
       padding: 6px 12px;
       border-radius: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     .status-neutral {
       background-color: rgba(255, 235, 59, 0.3);
@@ -223,15 +346,34 @@
       font-weight: 600;
       padding: 6px 12px;
       border-radius: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    tr:hover .status-profit {
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+    }
+    tr:hover .status-loss {
+      box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
     }
     /* Gráfico del PNL Acumulado */
     .chart-container {
       position: relative;
       height: 400px;
       width: 100%;
+      margin-top: 20px;
+    }
+    #tvChart {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 15px;
+      overflow: hidden;
     }
     .glass.chart-wrapper {
       padding: 25px;
+      background: rgba(255, 255, 255, 0.05);
     }
     .chart-container canvas {
       background: rgba(0, 0, 0, 0.2);
@@ -289,17 +431,122 @@
       transition: all 0.3s ease;
       transform: scale(1.02);
     }
+    /* Sistema de Notificaciones */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    
+    .notification {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 10px;
+      padding: 15px 25px;
+      margin-bottom: 10px;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transform: translateX(120%);
+      animation: slideIn 0.5s forwards;
+      display: flex;
+      align-items: center;
+      min-width: 300px;
+    }
+    
+    .notification.success {
+      border-left: 4px solid #4caf50;
+    }
+    
+    .notification.error {
+      border-left: 4px solid #f44336;
+    }
+    
+    .notification.info {
+      border-left: 4px solid #2196f3;
+    }
+    
+    @keyframes slideIn {
+      to {
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes slideOut {
+      to {
+        transform: translateX(120%);
+      }
+    }
+
+    /* Sistema de Notificaciones */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    
+    .reset-confirm {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.95);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      min-width: 300px;
+      text-align: center;
+    }
+    
+    .notification-content p {
+      margin-bottom: 15px;
+    }
+    
+    .notification-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .text-danger {
+      color: #ff4976;
+      font-weight: bold;
+    }
+
+    .stats-icon {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      opacity: 0.8;
+      transition: all 0.3s ease;
+    }
+
+    .stats-card:hover .stats-icon {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .stats-card.balance-card {
+      padding-bottom: 20px;
+    }
+
+    .stats-card.balance-card button {
+      margin-top: auto;
+    }
   </style>
 </head>
 <body>
-  <!-- Fondo animado -->
+  <!-- Contenedor de partículas -->
   <div id="particles-js"></div>
+
+  <!-- Contenedor de notificaciones -->
+  <div class="notification-container"></div>
 
   <!-- Header Minimalista -->
   <header class="header animate__animated animate__fadeInDown">
     <div class="container">
-      <h1>ULTRA SOL TRADING</h1>
-      <p>Gestión de trades con un diseño minimalista</p>
+      <h1>PICOSITOS DASHBOARD</h1>
       <div>
         <span class="price-badge" id="sol-usd">SOL/USD: Cargando...</span>
       </div>
@@ -311,29 +558,32 @@
     <div class="glass performance-summary animate__animated animate__fadeInUp">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="m-0">Resumen de Rendimiento</h3>
-        <button id="toggleCurrency" class="btn btn-outline-light btn-sm">Ver en SOL</button>
       </div>
       <div class="row justify-content-center">
         <div class="col-lg">
           <div class="stats-card">
+            <div class="stats-icon">📊</div>
             <h4>Total Trades</h4>
             <p id="totalTrades">0</p>
           </div>
         </div>
         <div class="col-lg">
           <div class="stats-card">
+            <div class="stats-icon">💰</div>
             <h4>Total Profit</h4>
             <p id="totalProfit">$0.00</p>
           </div>
         </div>
         <div class="col-lg">
           <div class="stats-card">
+            <div class="stats-icon">📈</div>
             <h4>Avg Profit/Trade</h4>
             <p id="avgProfit">$0.00</p>
           </div>
         </div>
         <div class="col-lg">
-          <div class="stats-card">
+          <div class="stats-card balance-card">
+            <div class="stats-icon">💎</div>
             <h4>Balance</h4>
             <p id="balanceValue">$0.00</p>
             <button id="setBalanceBtn">Set Balance</button>
@@ -405,12 +655,10 @@
       <!-- Nueva barra de búsqueda y botones de exportación y reinicio -->
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="input-group" style="max-width: 300px;">
-          <input type="text" class="form-control" id="searchTrade" placeholder="Buscar...">
+          <input type="text" class="form-control" id="searchTrade" placeholder="Buscar por moneda...">
           <button class="btn btn-outline-light" type="button" id="clearSearch">Limpiar</button>
         </div>
         <div>
-          <button type="button" class="btn btn-outline-light me-2" id="exportData">Exportar Datos</button>
-          <button type="button" class="btn btn-outline-light me-2" id="importData">Importar Datos</button>
           <button type="button" class="btn btn-outline-light me-2" id="exportCSV">Exportar CSV</button>
           <button type="button" class="btn btn-outline-danger" id="resetDashboard">Reiniciar Dashboard</button>
         </div>
@@ -444,13 +692,10 @@
   <div class="container">
     <div class="glass chart-wrapper animate__animated animate__fadeInUp">
       <div class="d-flex justify-content-between align-items-center chart-header">
-        <h3 class="m-0" id="chartTitle">PNL Acumulado (USD)</h3>
-        <button class="btn btn-outline-light btn-sm" id="toggleChartCurrency">
-          Cambiar a SOL
-        </button>
+        <h3 class="m-0">PNL Acumulado (USD)</h3>
       </div>
       <div class="chart-container">
-        <canvas id="pnlChart"></canvas>
+        <div id="tvChart"></div>
       </div>
     </div>
   </div>
@@ -543,7 +788,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-custom" id="saveBalanceBtn">Guardar</button>
+          <button type="submit" form="balanceForm" class="btn btn-custom">Guardar</button>
         </div>
       </div>
     </div>
@@ -558,7 +803,7 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-          <form id="feesForm">
+          <form id="feesForm" onsubmit="return false;">
             <div class="mb-3">
               <label for="defaultFee" class="form-label">Fee por Trade (SOL)</label>
               <input type="number" step="any" class="form-control" id="defaultFee" required>
@@ -579,7 +824,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-custom" id="saveFeesBtn">Guardar Configuración</button>
+          <button type="submit" form="feesForm" class="btn btn-custom">Guardar Configuración</button>
         </div>
       </div>
     </div>
@@ -620,8 +865,13 @@
     let tradeIdCounter = 0;  // Identificador único para cada trade
     let livePrices = { SOL: null };
     let tradesData = []; // Array con todos los trades
-    let initialBalance = parseFloat(localStorage.getItem('initialBalance')) || 0;
-    let currentCurrency = localStorage.getItem('currentCurrency') || "USD";
+    let storedBalance = localStorage.getItem('initialBalance');
+    if (storedBalance === null) {
+        storedBalance = "50"; // Valor por defecto: 50 dólares
+        localStorage.setItem('initialBalance', 50);
+    }
+    let initialBalance = parseFloat(storedBalance);
+    let currentCurrency = "USD";
     let defaultFee = parseFloat(localStorage.getItem('defaultFee')) || 0;
     let defaultRoyalties = parseFloat(localStorage.getItem('defaultRoyalties')) || 0;
 
@@ -634,7 +884,28 @@
       const stored = localStorage.getItem('tradesData');
       if (stored) {
         tradesData = JSON.parse(stored);
+        
+        let storedBalance = localStorage.getItem('initialBalance');
+        if (storedBalance === null) {
+            storedBalance = "50"; // Valor por defecto: 50 dólares
+            localStorage.setItem('initialBalance', 50);
+        }
+        initialBalance = parseFloat(storedBalance);
+        
+        // Asegurarse de que cada trade tenga fee y royalties
+        const defaultFee = parseFloat(localStorage.getItem('defaultFee')) || 0;
+        const defaultRoyalties = parseFloat(localStorage.getItem('defaultRoyalties')) || 0;
+        
+        tradesData = tradesData.map(trade => {
+          if (!trade.fee) trade.fee = defaultFee;
+          if (!trade.royalties) trade.royalties = defaultRoyalties;
+          trade.coinsMade = (trade.solSold - trade.solBought) - trade.fee - trade.royalties;
+          trade.profitUSD = livePrices.SOL ? trade.coinsMade * livePrices.SOL : 0;
+          return trade;
+        });
+        
         tradeIdCounter = tradesData.reduce((max, trade) => Math.max(max, trade.id), 0) + 1;
+        saveTradesData();
       }
     }
 
@@ -657,142 +928,139 @@
 
     // --- CHART.JS ---
     let pnlChart;
-    function initChart() {
-      const ctx = document.getElementById('pnlChart').getContext('2d');
-      pnlChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'PNL Acumulado',
-            data: [],
-            borderColor: '#00ff88',
-            backgroundColor: (context) => {
-              const chart = context.chart;
-              const {ctx, chartArea} = chart;
-              if (!chartArea) return null;
-              const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-              gradient.addColorStop(0, 'rgba(0, 255, 136, 0)');
-              gradient.addColorStop(1, 'rgba(0, 255, 136, 0.2)');
-              return gradient;
-            },
-            tension: 0.4,
-            fill: true,
-            borderWidth: 2,
-            pointRadius: 0,
-            pointHoverRadius: 8,
-            pointHoverBorderWidth: 2,
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: '#00ff88'
-          }]
+    let tvChart;
+    let baselineSeries;
+    
+    function initTvChart() {
+      const chartOptions = {
+        layout: {
+          background: { type: 'solid', color: '#131722' },
+          textColor: '#d1d4dc',
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: {
-            padding: {
-              left: 15,
-              right: 15,
-              top: 15,
-              bottom: 15
-            }
+        grid: {
+          vertLines: { color: '#1f2937' },
+          horzLines: { color: '#1f2937' },
+        },
+        rightPriceScale: {
+          visible: true,
+          borderVisible: false,
+          scaleMargins: {
+            top: 0.2,
+            bottom: 0.2,
           },
-          elements: {
-            line: {
-              borderWidth: 2
-            }
+        },
+        timeScale: {
+          borderVisible: false,
+          timeVisible: true,
+          secondsVisible: false,
+        },
+        crosshair: {
+          mode: 1,
+          vertLine: {
+            width: 1,
+            color: '#758696',
+            style: 1,
           },
-          interaction: {
-            intersect: false,
-            mode: 'index'
-          },
-          plugins: {
-            legend: {
-              display: false
-            },
-            tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.9)',
-              titleColor: '#fff',
-              bodyColor: '#fff',
-              padding: 12,
-              displayColors: false,
-              callbacks: {
-                label: function(context) {
-                  let value = context.parsed.y;
-                  return currentCurrency === 'USD' 
-                    ? `$ ${value.toFixed(2)}`
-                    : `${value.toFixed(4)} SOL`;
-                }
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              position: 'right',
-              grid: {
-                color: 'rgba(255, 255, 255, 0.1)',
-                drawBorder: false
-              },
-              ticks: {
-                color: '#999',
-                font: {
-                  size: 11
-                },
-                padding: 10,
-                callback: function(value) {
-                  return currentCurrency === 'USD'
-                    ? `$${value.toFixed(2)}`
-                    : `${value.toFixed(4)}`;
-                }
-              }
-            },
-            x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: '#999',
-                font: {
-                  size: 11
-                },
-                maxRotation: 0,
-                maxTicksLimit: 8,
-                padding: 10
-              }
-            }
+          horzLine: {
+            width: 1,
+            color: '#758696',
+            style: 1,
           }
         }
+      };
+
+      tvChart = LightweightCharts.createChart(document.getElementById('tvChart'), chartOptions);
+
+      baselineSeries = tvChart.addLineSeries({
+        baseValue: { type: 'price', price: 0 },
+        color: 'rgba(76, 175, 80, 0.8)',
+        lineWidth: 2,
+        lineType: 0,
+        crosshairMarkerVisible: true,
+        crosshairMarkerRadius: 4,
+        crosshairMarkerBorderColor: 'rgba(76, 175, 80, 0.8)',
+        crosshairMarkerBackgroundColor: '#ffffff',
+        lastPriceAnimation: 1,
+        priceFormat: {
+          type: 'price',
+          precision: currentCurrency === 'USD' ? 2 : 4,
+          minMove: currentCurrency === 'USD' ? 0.01 : 0.0001,
+        },
       });
+
+      // Agregar área de relleno
+      baselineSeries.setData([]);
+      baselineSeries.applyOptions({
+        priceLineVisible: false,
+        lastValueVisible: true,
+        baseLineVisible: true,
+        baseLineColor: '#758696',
+        baseLineWidth: 1,
+        baseLineStyle: 1,
+        fillStyle: {
+          type: 'gradient',
+          gradient: {
+            startColor: 'rgba(76, 175, 80, 0.2)',
+            stopColor: 'rgba(76, 175, 80, 0.05)',
+          },
+        },
+      });
+
+      updateChart();
     }
 
     // --- FUNCIONES DE ACTUALIZACIÓN ---
     async function fetchLivePrices() {
       try {
+        // Si ya tenemos un precio, usar ese temporalmente
+        const previousPrice = livePrices.SOL;
+        
         const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd', {
           headers: {
             'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
+            'Cache-Control': 'max-age=30'
           }
         });
+        
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          if (response.status === 429) {
+            console.log('Rate limit reached, waiting longer...');
+            // Si tenemos un precio anterior, seguir usándolo
+            if (previousPrice) {
+              livePrices.SOL = previousPrice;
+              // Guardar el último precio válido
+              localStorage.setItem('lastValidPrice', previousPrice);
+              return true;
+            }
+            setTimeout(fetchLivePrices, 60000);
+            return;
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const data = await response.json();
         if (!data.solana || !data.solana.usd) {
           throw new Error('Invalid data format');
         }
+        
+        // Guardar el nuevo precio válido
+        localStorage.setItem('lastValidPrice', data.solana.usd);
         livePrices.SOL = data.solana.usd;
         document.getElementById('sol-usd').textContent = `SOL/USD: $${livePrices.SOL.toLocaleString()}`;
+        // Solo actualizar la UI si el precio cambió significativamente
+        if (Math.abs(data.solana.usd - previousPrice) / previousPrice > 0.001) {
         renderTradesTable();
         updateSummaryStats();
         updateChart();
+        }
+        return true;
       } catch (error) {
         console.error('Error fetching live price:', error);
-        document.getElementById('sol-usd').textContent = 'Error cargando precio';
-        // Reintentar en 5 segundos
-        setTimeout(fetchLivePrices, 5000);
+        if (!livePrices.SOL) {
+          document.getElementById('sol-usd').textContent = 'Cargando precio...';
+        }
+        setTimeout(fetchLivePrices, 30000);
+        return false;
       }
     }
 
@@ -802,16 +1070,10 @@
       tradesTable.innerHTML = "";
       // Ordenar por fecha
       tradesData.sort((a, b) => new Date(a.date) - new Date(b.date));
-      let filterText = document.getElementById('searchTrade').value.toLowerCase();
-      const filteredTrades = tradesData.filter(trade => {
-        return (
-          trade.date.toLowerCase().includes(filterText) ||
-          (trade.note && trade.note.toLowerCase().includes(filterText)) ||
-          (trade.profitUSD > 0 && "profit".includes(filterText)) ||
-          (trade.profitUSD < 0 && "loss".includes(filterText)) ||
-          (trade.profitUSD === 0 && "neutral".includes(filterText))
-        );
-      });
+      const filterText = document.getElementById('searchTrade').value.toLowerCase();
+      const filteredTrades = tradesData.filter(trade => 
+        trade.coinName.toLowerCase().includes(filterText)
+      );
       filteredTrades.forEach(trade => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', trade.id);
@@ -845,71 +1107,93 @@
     }
 
     function updateChart() {
-      if (!pnlChart) return;
-
-      const labels = [];
-      const data = [];
-      let acumulado = 0;
-
-      tradesData.forEach(trade => {
-        if(currentCurrency === "USD") {
-          acumulado += trade.profitUSD;
-        } else {
-          acumulado += trade.coinsMade;
-        }
-        labels.push(trade.date);
-        data.push(acumulado);
-      });
-
-      pnlChart.data.labels = labels;
-      pnlChart.data.datasets[0].data = data;
-      
-      const finalValue = data.length ? data[data.length - 1] : 0;
-      if(finalValue > 0) {
-        pnlChart.data.datasets[0].borderColor = '#00ff88';
-        pnlChart.data.datasets[0].pointHoverBorderColor = '#00ff88';
-      } else if(finalValue < 0) {
-        pnlChart.data.datasets[0].borderColor = '#ff4976';
-        pnlChart.data.datasets[0].pointHoverBorderColor = '#ff4976';
+      if (!tvChart) {
+        initTvChart();
+        return;
       }
-
-      pnlChart.update();
+      
+      // Usar el balance almacenado como base para la gráfica
+      let storedBalance = localStorage.getItem('initialBalance');
+      if (storedBalance === null) {
+        storedBalance = "50";
+      }
+      storedBalance = parseFloat(storedBalance);
+      
+      let accumulated = storedBalance;
+      
+      const data = [];
+      
+      // Calcular punto inicial: si existen trades, un poco antes de la fecha del primer trade; si no, ahora
+      let startTime = Math.floor(Date.now() / 1000);
+      const sortedTrades = [...tradesData].sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+      if(sortedTrades.length > 0) {
+        startTime = Math.floor(new Date(sortedTrades[0].date).getTime() / 1000) - 60;
+      }
+      
+      // Agregar el punto inicial
+      data.push({ time: startTime, value: accumulated });
+      
+      // Sumar los beneficios/pérdidas de cada trade al acumulado
+      sortedTrades.forEach(trade => {
+        accumulated += trade.profitUSD;
+        data.push({
+          time: Math.floor(new Date(trade.date).getTime() / 1000),
+          value: accumulated
+        });
+      });
+      
+      if (data.length === 0) {
+        data.push({
+          time: Math.floor(Date.now() / 1000),
+          value: accumulated
+        });
+      }
+  
+      baselineSeries.setData(data);
+      tvChart.timeScale().fitContent();
     }
 
     function updateSummaryStats() {
+      // Si no hay precio actual, usar el último precio válido
+      if (!livePrices.SOL) {
+        const lastValidPrice = parseFloat(localStorage.getItem('lastValidPrice'));
+        if (lastValidPrice) {
+          livePrices.SOL = lastValidPrice;
+        } else {
+          return;
+        }
+      }
+      
       let wins = 0, losses = 0;
       let totalProfitVal = 0;
       let bestTrade = -Infinity, worstTrade = Infinity;
+      
+      let storedBalance = localStorage.getItem('initialBalance');
+      if (storedBalance === null) {
+        storedBalance = "50";
+      }
+      storedBalance = parseFloat(storedBalance);
+      
       tradesData.forEach(trade => {
-        if(currentCurrency === "USD"){
-          totalProfitVal += trade.profitUSD;
-          if (trade.profitUSD > 0) wins++;
-          else if (trade.profitUSD < 0) losses++;
-          if(trade.profitUSD > bestTrade) bestTrade = trade.profitUSD;
-          if(trade.profitUSD < worstTrade) worstTrade = trade.profitUSD;
-        } else {
-          totalProfitVal += trade.coinsMade;
-          if (trade.coinsMade > 0) wins++;
-          else if (trade.coinsMade < 0) losses++;
-          if(trade.coinsMade > bestTrade) bestTrade = trade.coinsMade;
-          if(trade.coinsMade < worstTrade) worstTrade = trade.coinsMade;
-        }
+        totalProfitVal += trade.profitUSD;
+        if (trade.profitUSD > 0) wins++;
+        else if (trade.profitUSD < 0) losses++;
+        if(trade.profitUSD > bestTrade) bestTrade = trade.profitUSD;
+        if(trade.profitUSD < worstTrade) worstTrade = trade.profitUSD;
       });
+      
       const totalTrades = tradesData.length;
       let avgProfitVal = totalTrades > 0 ? (totalProfitVal / totalTrades) : 0;
       let hitrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) : "0.00";
+      
+      document.getElementById('totalProfit').textContent = "$" + totalProfitVal.toFixed(2);
+      document.getElementById('avgProfit').textContent = "$" + avgProfitVal.toFixed(2);
+      let balance = storedBalance + totalProfitVal;
+      document.getElementById('balanceValue').textContent = "$" + balance.toFixed(2);
+      
       document.getElementById('totalTrades').textContent = totalTrades;
-      if(currentCurrency === "USD"){
-         document.getElementById('totalProfit').textContent = "$" + totalProfitVal.toFixed(2);
-         document.getElementById('avgProfit').textContent = "$" + avgProfitVal.toFixed(2);
-         let balance = initialBalance + totalProfitVal;
-         document.getElementById('balanceValue').textContent = "$" + balance.toFixed(2);
-      } else {
-         document.getElementById('totalProfit').textContent = totalProfitVal.toFixed(4) + " SOL";
-         document.getElementById('avgProfit').textContent = avgProfitVal.toFixed(4) + " SOL";
-         let balance = initialBalance + totalProfitVal;
-         document.getElementById('balanceValue').textContent = balance.toFixed(4) + " SOL";
-      }
       document.getElementById('winsCount').textContent = wins;
       document.getElementById('lossesCount').textContent = losses;
       document.getElementById('hitrateValue').textContent = `${hitrate}%`;
@@ -918,17 +1202,14 @@
       bestWorstEl.innerHTML = "";
       bestWorstEl.classList.remove("pulse-green", "pulse-red");
       if(totalTrades > 0) {
-        if(bestTrade > 0) {
+        if(totalProfitVal > 0) {
           bestWorstEl.classList.add("pulse-green");
-        } else if(worstTrade < 0) {
+        } else if(totalProfitVal < 0) {
           bestWorstEl.classList.add("pulse-red");
         } else {
           bestWorstEl.style.backgroundColor = "transparent";
           bestWorstEl.style.border = "none";
         }
-      } else {
-        bestWorstEl.style.backgroundColor = "transparent";
-        bestWorstEl.style.border = "none";
       }
     }
 
@@ -961,14 +1242,46 @@
     document.getElementById('tradeForm').addEventListener('submit', function(event) {
       event.preventDefault();
       
+      // Verificar si hay fees y royalties configurados
+      const fee = parseFloat(localStorage.getItem('defaultFee'));
+      const royalties = parseFloat(localStorage.getItem('defaultRoyalties'));
+      
+      if (isNaN(fee) || isNaN(royalties)) {
+        showNotification('⚠️ Debes configurar Fee y Royalties antes de hacer trades', 'error');
+        new bootstrap.Modal(document.getElementById('feesModal')).show();
+        return;
+      }
+      
+      const solBought = parseFloat(document.getElementById('solBought').value);
+      let totalProfitInSOL = 0;
+      tradesData.forEach(trade => {
+        totalProfitInSOL += trade.coinsMade;
+      });
+      const realBalance = currentCurrency === "USD" ? 
+        (initialBalance + totalProfitInSOL * livePrices.SOL) : 
+        (initialBalance + totalProfitInSOL);
+      
+      const currentBalanceInSOL = currentCurrency === "USD" ? 
+        realBalance / livePrices.SOL : 
+        realBalance;
+      
+      // Verificar si hay suficiente balance
+      if (solBought > currentBalanceInSOL) {
+        const balanceMsg = currentCurrency === "USD" 
+          ? `Balance insuficiente. Tu balance actual es $${realBalance.toFixed(2)} (${currentBalanceInSOL.toFixed(4)} SOL)`
+          : `Balance insuficiente. Tu balance actual es ${realBalance.toFixed(4)} SOL`;
+        showNotification(`⚠️ ${balanceMsg}`, 'error');
+        return;
+      }
+      
       const trade = {
         id: tradeIdCounter++,
         date: document.getElementById('tradeDate').value,
         coinName: document.getElementById('coinName').value,
-        solBought: parseFloat(document.getElementById('solBought').value),
+        solBought: solBought,
         solSold: parseFloat(document.getElementById('solSold').value),
-        fee: parseFloat(localStorage.getItem('defaultFee')) || 0,
-        royalties: parseFloat(localStorage.getItem('defaultRoyalties')) || 0,
+        fee: fee,
+        royalties: royalties,
         note: document.getElementById('note').value
       };
       
@@ -1001,9 +1314,8 @@
         trade.note = document.getElementById('editNote').value;
         trade.coinsMade = (trade.solSold - trade.solBought) - trade.fee - trade.royalties;
         trade.profitUSD = livePrices.SOL ? trade.coinsMade * livePrices.SOL : 0;
-        renderTradesTable();
-        updateSummaryStats();
-        updateChart();
+      renderTradesTable();
+      updateSummaryStats();
         saveTradesData();
         var editModalEl = document.getElementById('editTradeModal');
         var modalInstance = bootstrap.Modal.getInstance(editModalEl);
@@ -1036,25 +1348,6 @@
       document.body.removeChild(a);
     });
 
-    // --- INICIALIZACIÓN DE PARTICLES.JS ---
-    particlesJS("particles-js", {
-      "particles": {
-        "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
-        "color": { "value": "#ffffff" },
-        "shape": { "type": "circle", "stroke": { "width": 0, "color": "#000000" } },
-        "opacity": { "value": 0.5, "random": false },
-        "size": { "value": 3, "random": true },
-        "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 },
-        "move": { "enable": true, "speed": 6, "direction": "none", "random": false, "straight": false, "out_mode": "out" }
-      },
-      "interactivity": {
-        "detect_on": "canvas",
-        "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
-        "modes": { "repulse": { "distance": 200, "duration": 0.4 } }
-      },
-      "retina_detect": true
-    });
-
     // Función para establecer la fecha actual en el formulario
     function setCurrentDate() {
       const today = new Date().toISOString().split('T')[0];
@@ -1063,32 +1356,7 @@
 
     // Inicialización al cargar la página
     document.addEventListener('DOMContentLoaded', function() {
-      // Verificar si existen valores de fee y royalties guardados
-      const savedFee = localStorage.getItem('defaultFee');
-      const savedRoyalties = localStorage.getItem('defaultRoyalties');
-      
-      // Si no hay valores guardados, mostrar el modal de configuración
-      if (!savedFee || !savedRoyalties) {
-        setTimeout(() => {
-          alert('Por favor, configure los valores de Fee y Royalties antes de comenzar');
-          new bootstrap.Modal(document.getElementById('feesModal')).show();
-        }, 1000);
-      }
-      
-      initChart();
-      setCurrentDate();
-      loadTradesData();
-      updateSummaryStats();
-      renderTradesTable();
-      updateChart();
-      fetchLivePrices();
-      setInterval(fetchLivePrices, 60000);
-      
-      // Establecer el texto inicial del botón de cambio de moneda
-      const chartCurrencyBtn = document.getElementById('toggleChartCurrency');
-      chartCurrencyBtn.textContent = currentCurrency === "USD" ? "Cambiar a SOL" : "Cambiar a USD";
-      document.getElementById('chartTitle').textContent = `PNL Acumulado (${currentCurrency})`;
-      updateFeesDisplay();
+      initializeApp();
     });
 
     // Listener para establecer o cambiar el balance inicial mediante modal
@@ -1101,101 +1369,88 @@
       new bootstrap.Modal(document.getElementById('balanceModal')).show();
     });
 
-    // Listener para alternar la visualización entre USD y SOL
-    document.getElementById('toggleCurrency').addEventListener('click', function() {
-      if (livePrices.SOL) {
-        // Convertir el balance inicial al cambiar la moneda:
-        if(currentCurrency === "USD") {
-          // Convertir de USD a SOL (dividir por el precio de SOL)
-          initialBalance = initialBalance / livePrices.SOL;
-        } else {
-          // Convertir de SOL a USD (multiplicar por el precio de SOL)
-          initialBalance = initialBalance * livePrices.SOL;
-        }
-      }
-      // Toggle entre USD y SOL
-      currentCurrency = (currentCurrency === "USD" ? "SOL" : "USD");
-      localStorage.setItem('currentCurrency', currentCurrency);
-      // Actualizar el texto del botón toggle
-      document.getElementById("toggleCurrency").textContent = currentCurrency === "USD" ? "Ver en SOL" : "Ver en USD";
-      // Actualizar el encabezado de la columna profit
-      document.getElementById("profitHeader").textContent = currentCurrency === "USD" ? "Profit in USD" : "Profit (SOL)";
-      // Actualizar la etiqueta de moneda del modal de balance
-      document.getElementById("balanceCurrencyLabel").textContent = currentCurrency;
-      updateSummaryStats();
-      renderTradesTable();
-      updateChart();
-    });
-
     // Listener para reiniciar el dashboard (limpiar datos almacenados)
     document.getElementById('resetDashboard').addEventListener('click', function() {
-      if (confirm("¿Está seguro que desea reiniciar el dashboard? Se borrarán TODOS los datos almacenados.")) {
+      const modal = document.createElement('div');
+      modal.className = 'notification reset-confirm';
+      modal.innerHTML = `
+        <div class="notification-content">
+          <p>¿Está seguro que desea reiniciar el dashboard?</p>
+          <p class="text-danger">Se borrarán TODOS los datos almacenados.</p>
+          <div class="notification-actions">
+            <button class="btn btn-secondary btn-sm" id="cancelReset">Cancelar</button>
+            <button class="btn btn-danger btn-sm" id="confirmReset">Reiniciar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      
+      document.getElementById('cancelReset').onclick = function() {
+        document.body.removeChild(modal);
+      };
+      
+      document.getElementById('confirmReset').onclick = function() {
         // Eliminar datos de localStorage
-        localStorage.removeItem('tradesData');
-        localStorage.removeItem('initialBalance');
-        localStorage.removeItem('defaultFee');
-        localStorage.removeItem('defaultRoyalties');
-        localStorage.removeItem('currentCurrency');
-
+        localStorage.clear(); // Limpiar todo el localStorage
+        
         // Reiniciar variables globales
         tradesData = [];
         tradeIdCounter = 0;
         initialBalance = 0;
         currentCurrency = "USD";
-
-        // Reiniciar interfaz: boton toggle, busqueda, y actualizar el dashboard
+        defaultFee = 0;
+        defaultRoyalties = 0;
+        
+        // Reiniciar interfaz
         document.getElementById("toggleCurrency").textContent = "Ver en SOL";
         document.getElementById('searchTrade').value = "";
+        document.getElementById('displayFee').value = '0 SOL';
+        document.getElementById('displayRoyalties').value = '0 SOL';
+        document.getElementById('currentFee').textContent = '0';
+        document.getElementById('currentRoyalties').textContent = '0';
+        
         updateSummaryStats();
         renderTradesTable();
         updateChart();
-      }
+        
+        // Agregar animación de salida al modal
+        modal.style.animation = 'slideOut 0.5s forwards';
+        // Después de la animación, remover el modal, mostrar notificación y recargar la página
+        setTimeout(() => {
+          document.body.removeChild(modal);
+          showNotification('✅ Dashboard reiniciado correctamente', 'success');
+          location.reload();
+        }, 500);
+      };
     });
 
-    // Guardar el nuevo balance desde el modal
-    document.getElementById('saveBalanceBtn').addEventListener('click', function() {
+    // Listener para el formulario de balance
+    document.getElementById('balanceForm').addEventListener('submit', function(e) {
+      e.preventDefault();
       let newBalance = parseFloat(document.getElementById('balanceInput').value);
       if (!isNaN(newBalance)) {
-         initialBalance = newBalance;
-         localStorage.setItem('initialBalance', initialBalance);
-         updateSummaryStats();
-         // Ocultar el modal
-         bootstrap.Modal.getInstance(document.getElementById('balanceModal')).hide();
+        initialBalance = newBalance;
+        localStorage.setItem('initialBalance', initialBalance);
+        updateSummaryStats();
+        bootstrap.Modal.getInstance(document.getElementById('balanceModal')).hide();
+        showNotification('✅ Balance actualizado correctamente', 'success');
       }
-    });
-
-    // Listener para cambiar la moneda del gráfico
-    document.getElementById('toggleChartCurrency').addEventListener('click', function() {
-      const button = this;
-      if (currentCurrency === "USD") {
-        currentCurrency = "SOL";
-        button.textContent = "Cambiar a USD";
-        document.getElementById('chartTitle').textContent = "PNL Acumulado (SOL)";
-      } else {
-        currentCurrency = "USD";
-        button.textContent = "Cambiar a SOL";
-        document.getElementById('chartTitle').textContent = "PNL Acumulado (USD)";
-      }
-      localStorage.setItem('currentCurrency', currentCurrency);
-      updateChart();
-      updateSummaryStats();
-      renderTradesTable();
     });
 
     // Función para actualizar los displays de fee y royalties
     function updateFeesDisplay() {
-      const fee = parseFloat(localStorage.getItem('defaultFee'));
-      const royalties = parseFloat(localStorage.getItem('defaultRoyalties'));
+      const fee = parseFloat(localStorage.getItem('defaultFee')) || 0;
+      const royalties = parseFloat(localStorage.getItem('defaultRoyalties')) || 0;
       
-      // Solo actualizar si hay valores guardados
-      if (!isNaN(fee)) {
-        document.getElementById('displayFee').value = fee + ' SOL';
-        document.getElementById('currentFee').textContent = fee;
-      }
-      if (!isNaN(royalties)) {
-        document.getElementById('displayRoyalties').value = royalties + ' SOL';
-        document.getElementById('currentRoyalties').textContent = royalties;
-      }
+      // Actualizar siempre los valores
+      document.getElementById('displayFee').value = fee + ' SOL';
+      document.getElementById('currentFee').textContent = fee;
+      document.getElementById('displayRoyalties').value = royalties + ' SOL';
+      document.getElementById('currentRoyalties').textContent = royalties;
+      
+      // Actualizar las variables globales
+      defaultFee = fee;
+      defaultRoyalties = royalties;
     }
 
     // Listener para abrir el modal de configuración
@@ -1209,8 +1464,9 @@
       new bootstrap.Modal(document.getElementById('feesModal')).show();
     });
 
-    // Listener para guardar la configuración
-    document.getElementById('saveFeesBtn').addEventListener('click', function() {
+    // Listener para el formulario de fees
+    document.getElementById('feesForm').addEventListener('submit', function(e) {
+      e.preventDefault();
       const fee = parseFloat(document.getElementById('defaultFee').value);
       const royalties = parseFloat(document.getElementById('defaultRoyalties').value);
       
@@ -1218,11 +1474,109 @@
         localStorage.setItem('defaultFee', fee);
         localStorage.setItem('defaultRoyalties', royalties);
         updateFeesDisplay();
-        alert('Valores de Fee y Royalties actualizados correctamente');
+        showNotification('✅ Valores de Fee y Royalties actualizados correctamente', 'success');
         bootstrap.Modal.getInstance(document.getElementById('feesModal')).hide();
       }
     });
+
+    // Función para mostrar notificaciones
+    function showNotification(message, type = 'info') {
+      const container = document.querySelector('.notification-container');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = message;
+      
+      container.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.5s forwards';
+        setTimeout(() => {
+          container.removeChild(notification);
+        }, 500);
+      }, 3000);
+    }
+
+    // Agregar listener para el resize de la ventana
+    window.addEventListener('resize', () => {
+      if (tvChart) {
+        tvChart.resize(
+          document.getElementById('tvChart').offsetWidth,
+          400
+        );
+        tvChart.timeScale().fitContent();
+      }
+    });
+
+    function initializeApp() {
+      // Inicializar particles.js primero
+      particlesJS("particles-js", {
+        particles: {
+          number: { value: 80, density: { enable: true, value_area: 800 } },
+          color: { value: "#ffffff" },
+          shape: { type: "circle", stroke: { width: 0, color: "#000000" } },
+          opacity: { value: 0.5, random: false },
+          size: { value: 3, random: true },
+          line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1 },
+          move: { enable: true, speed: 6, direction: "none", random: false, straight: false, out_mode: "out" }
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" }, resize: true },
+          modes: { repulse: { distance: 200, duration: 0.4 } }
+        },
+        retina_detect: true
+      });
+      
+      // Verificar si la librería TradingView está cargada
+      if (typeof LightweightCharts === 'undefined') {
+        console.log('Esperando a que cargue TradingView...');
+        setTimeout(initializeApp, 100);
+        return;
+      }
+      
+      // Resto de la inicialización
+      currentCurrency = localStorage.getItem('currentCurrency') || "USD";
+      
+      // Si ya se tiene un último precio válido almacenado, asignarlo inmediatamente
+      const storedLastPrice = localStorage.getItem('lastValidPrice');
+      if (storedLastPrice) {
+         livePrices.SOL = parseFloat(storedLastPrice);
+         document.getElementById('sol-usd').textContent = `SOL/USD: $${livePrices.SOL.toLocaleString()}`;
+      }
+      
+      // Obtener el precio primero
+      fetchLivePrices().then(() => {
+        loadTradesData();
+        recalcTradesProfit();
+        initTvChart();
+        updateSummaryStats();
+        renderTradesTable();
+        updateChart();
+        
+        // Actualizar el precio cada minuto
+        setInterval(async () => {
+          const priceUpdated = await fetchLivePrices();
+          if (priceUpdated) {
+            recalcTradesProfit();
+            document.getElementById('sol-usd').textContent = `SOL/USD: $${livePrices.SOL.toLocaleString()}`;
+            updateSummaryStats();
+            renderTradesTable();
+            updateChart();
+          }
+        }, 60000);
+      });
+      
+      updateFeesDisplay();
+      setCurrentDate();
+    }
+
+    // Nueva función: recalcular las ganancias de cada trade usando el precio actual
+    function recalcTradesProfit() {
+      tradesData = tradesData.map(trade => {
+        trade.profitUSD = livePrices.SOL ? trade.coinsMade * livePrices.SOL : 0;
+        return trade;
+      });
+    }
   </script>
 </body>
 </html>
-
