@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ultra SOL Trading Dashboard - Minimal & Avanzado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Animate.css para animaciones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <!-- Google Fonts: Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Particles.js -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #181818;
+      color: #e0e0e0;
+      margin: 0;
+      padding-bottom: 50px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    /* Fondo animado */
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      top: 0;
+      left: 0;
+    }
+    /* Header Minimalista */
+    .header {
+      text-align: center;
+      padding: 70px 20px;
+      background: linear-gradient(135deg, #1b1b1b, #2e2e2e);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+      margin-bottom: 50px;
+    }
+    .header h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+    .header p {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+    .price-badge {
+      font-size: 1.1rem;
+      padding: 12px 24px;
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 25px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    /* Efecto Glass para contenedores */
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      padding: 30px 40px;
+      margin-bottom: 40px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    /* Panel de Rendimiento y Estadísticas */
+    .performance-summary {
+      margin-bottom: 40px;
+    }
+    .stats-card {
+      height: 140px;
+      padding: 25px 15px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      margin-bottom: 20px;
+      text-align: center;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    }
+    .stats-card h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+      color: #a0a0a0;
+    }
+    .stats-card p {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin: 0;
+      color: #fff;
+    }
+    .stats-card button {
+      margin-top: 10px;
+      padding: 5px 15px;
+      font-size: 0.8rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+    .stats-card button:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.3);
+    }
+    /* Recuadro Best / Worst Trade: sin texto, solo animación */
+    #bestWorst {
+      height: 60px;
+      border-radius: 8px;
+      margin: 10px auto;
+      width: 100%;
+      transition: all 0.5s ease;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    /* Formulario de Registro de Trade */
+    .trade-form label {
+      font-weight: 700;
+      color: #e0e0e0;
+    }
+    .trade-form input.form-control {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e0e0e0;
+      height: 50px;
+      font-size: 1.1rem;
+    }
+    .trade-form input.form-control::placeholder {
+      color: rgba(224,224,224,0.6);
+    }
+    .btn-custom {
+      background: #3a8fb7;
+      border: none;
+      font-size: 1.1rem;
+      padding: 14px 20px;
+      transition: all 0.3s ease;
+      border-radius: 8px;
+      color: #fff;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    }
+    .btn-custom:hover {
+      background: #337aa3;
+      transform: scale(1.03);
+    }
+    /* Checkbox y botón de limpiar defaults */
+    .form-check-label {
+      font-size: 0.95rem;
+      color: #b0b0b0;
+    }
+    .btn-clear {
+      margin-left: 10px;
+      font-size: 0.9rem;
+      color: #bbb;
+    }
+    /* Tabla de Historial de Trades */
+    table {
+      color: #e0e0e0;
+    }
+    table thead {
+      background: #2c3e50;
+    }
+    table tbody tr:nth-child(even) {
+      background: rgba(255,255,255,0.04);
+    }
+    table tbody tr:nth-child(odd) {
+      background: rgba(255,255,255,0.02);
+    }
+    table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transition: background 0.3s ease;
+    }
+    table td, table th {
+      padding: 12px 15px;
+      vertical-align: middle;
+    }
+    /* Columna de Acciones */
+    th.actions, td.actions {
+      text-align: center;
+      width: 120px;
+    }
+    .btn-edit, .btn-delete {
+      font-size: 0.8rem;
+      margin: 0 2px;
+      padding: 4px 8px;
+    }
+    /* Status Badges */
+    .status-profit {
+      background-color: rgba(76, 175, 80, 0.3);
+      color: #4caf50;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    .status-loss {
+      background-color: rgba(244, 67, 54, 0.3);
+      color: #f44336;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    .status-neutral {
+      background-color: rgba(255, 235, 59, 0.3);
+      color: #ffeb3b;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    /* Gráfico del PNL Acumulado */
+    .chart-container {
+      position: relative;
+      height: 400px;
+      width: 100%;
+    }
+    .glass.chart-wrapper {
+      padding: 25px;
+    }
+    .chart-container canvas {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+    }
+    .chart-header {
+      margin-bottom: 20px;
+    }
+    /* Estadísticas básicas */
+    .basic-stats {
+      margin-top: 30px;
+    }
+    /* Transiciones generales */
+    a, button {
+      transition: all 0.3s ease;
+    }
+    /* Animaciones para el recuadro Best / Worst Trade */
+    @keyframes pulseGreen {
+      0% { 
+        background: linear-gradient(45deg, rgba(76, 175, 80, 0.4), rgba(105, 240, 174, 0.4));
+        box-shadow: 0 0 25px rgba(76, 175, 80, 0.4);
+      }
+      50% { 
+        background: linear-gradient(45deg, rgba(76, 175, 80, 0.6), rgba(105, 240, 174, 0.6));
+        box-shadow: 0 0 35px rgba(76, 175, 80, 0.6);
+      }
+      100% { 
+        background: linear-gradient(45deg, rgba(76, 175, 80, 0.4), rgba(105, 240, 174, 0.4));
+        box-shadow: 0 0 25px rgba(76, 175, 80, 0.4);
+      }
+    }
+    @keyframes pulseRed {
+      0% { 
+        background: linear-gradient(45deg, rgba(244, 67, 54, 0.4), rgba(255, 128, 128, 0.4));
+        box-shadow: 0 0 25px rgba(244, 67, 54, 0.4);
+      }
+      50% { 
+        background: linear-gradient(45deg, rgba(244, 67, 54, 0.6), rgba(255, 128, 128, 0.6));
+        box-shadow: 0 0 35px rgba(244, 67, 54, 0.6);
+      }
+      100% { 
+        background: linear-gradient(45deg, rgba(244, 67, 54, 0.4), rgba(255, 128, 128, 0.4));
+        box-shadow: 0 0 25px rgba(244, 67, 54, 0.4);
+      }
+    }
+    .pulse-green {
+      animation: pulseGreen 2s infinite;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      transform: scale(1.02);
+    }
+    .pulse-red {
+      animation: pulseRed 2s infinite;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo animado -->
+  <div id="particles-js"></div>
+
+  <!-- Header Minimalista -->
+  <header class="header animate__animated animate__fadeInDown">
+    <div class="container">
+      <h1>ULTRA SOL TRADING</h1>
+      <p>Gestión de trades con un diseño minimalista</p>
+      <div>
+        <span class="price-badge" id="sol-usd">SOL/USD: Cargando...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Panel Avanzado de Rendimiento -->
+  <div class="container">
+    <div class="glass performance-summary animate__animated animate__fadeInUp">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="m-0">Resumen de Rendimiento</h3>
+        <button id="toggleCurrency" class="btn btn-outline-light btn-sm">Ver en SOL</button>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-lg">
+          <div class="stats-card">
+            <h4>Total Trades</h4>
+            <p id="totalTrades">0</p>
+          </div>
+        </div>
+        <div class="col-lg">
+          <div class="stats-card">
+            <h4>Total Profit</h4>
+            <p id="totalProfit">$0.00</p>
+          </div>
+        </div>
+        <div class="col-lg">
+          <div class="stats-card">
+            <h4>Avg Profit/Trade</h4>
+            <p id="avgProfit">$0.00</p>
+          </div>
+        </div>
+        <div class="col-lg">
+          <div class="stats-card">
+            <h4>Balance</h4>
+            <p id="balanceValue">$0.00</p>
+            <button id="setBalanceBtn">Set Balance</button>
+          </div>
+        </div>
+        <div class="col-lg">
+          <div class="stats-card" id="bestWorstContainer">
+            <h4>Trade Status</h4>
+            <div id="bestWorst"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de Registro de Trade -->
+  <div class="container">
+    <div class="glass trade-form animate__animated animate__fadeInUp">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Registrar Trade</h2>
+        <div>
+          <button type="button" class="btn btn-outline-light" id="configureFeesBtn">
+            Configurar Fee y Royalties
+          </button>
+        </div>
+      </div>
+      <form id="tradeForm">
+        <div class="row g-3">
+          <div class="col-md-2">
+            <label for="tradeDate" class="form-label">Fecha</label>
+            <input type="date" class="form-control" id="tradeDate" readonly required>
+          </div>
+          <div class="col-md-2">
+            <label for="coinName" class="form-label">Moneda</label>
+            <input type="text" class="form-control" id="coinName" placeholder="Ej: Bitcoin" required>
+          </div>
+          <div class="col-md-3">
+            <label for="solBought" class="form-label">SOL Comprados</label>
+            <input type="number" class="form-control" id="solBought" placeholder="Ej: 10" step="any" required>
+          </div>
+          <div class="col-md-3">
+            <label for="solSold" class="form-label">SOL Vendidos</label>
+            <input type="number" class="form-control" id="solSold" placeholder="Ej: 12" step="any" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Fee Actual:</label>
+            <input type="text" class="form-control" id="displayFee" disabled>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Royalties Actuales:</label>
+            <input type="text" class="form-control" id="displayRoyalties" disabled>
+          </div>
+          <div class="col-md-9">
+            <label for="note" class="form-label">Nota</label>
+            <input type="text" class="form-control" id="note" placeholder="Observaciones">
+          </div>
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-custom w-100">Agregar Trade</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Historial de Trades -->
+  <div class="container">
+    <div class="glass table-container animate__animated animate__fadeInUp">
+      <h3 class="mb-4">Historial de Trades</h3>
+      <!-- Nueva barra de búsqueda y botones de exportación y reinicio -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="input-group" style="max-width: 300px;">
+          <input type="text" class="form-control" id="searchTrade" placeholder="Buscar...">
+          <button class="btn btn-outline-light" type="button" id="clearSearch">Limpiar</button>
+        </div>
+        <div>
+          <button type="button" class="btn btn-outline-light me-2" id="exportData">Exportar Datos</button>
+          <button type="button" class="btn btn-outline-light me-2" id="importData">Importar Datos</button>
+          <button type="button" class="btn btn-outline-light me-2" id="exportCSV">Exportar CSV</button>
+          <button type="button" class="btn btn-outline-danger" id="resetDashboard">Reiniciar Dashboard</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Moneda</th>
+              <th>SOL Comprados</th>
+              <th>SOL Vendidos</th>
+              <th>Fee (SOL)</th>
+              <th>Royalties (SOL)</th>
+              <th>COINS MADE</th>
+              <th id="profitHeader">Profit in USD</th>
+              <th>Status</th>
+              <th>Nota</th>
+              <th class="actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tradesTable">
+            <!-- Las filas se agregarán dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico del PNL Acumulado -->
+  <div class="container">
+    <div class="glass chart-wrapper animate__animated animate__fadeInUp">
+      <div class="d-flex justify-content-between align-items-center chart-header">
+        <h3 class="m-0" id="chartTitle">PNL Acumulado (USD)</h3>
+        <button class="btn btn-outline-light btn-sm" id="toggleChartCurrency">
+          Cambiar a SOL
+        </button>
+      </div>
+      <div class="chart-container">
+        <canvas id="pnlChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Espaciador -->
+  <div style="margin-bottom: 50px;"></div>
+
+  <!-- Resumen de Estadísticas Básicas -->
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="stats-card text-center bg-success">
+          <h4>Wins</h4>
+          <p id="winsCount">0</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-card text-center bg-danger">
+          <h4>Losses</h4>
+          <p id="lossesCount">0</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-card text-center bg-info">
+          <h4>Hitrate %</h4>
+          <p id="hitrateValue">0.00%</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Trade Modal -->
+  <div class="modal fade" id="editTradeModal" tabindex="-1" aria-labelledby="editTradeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editTradeModalLabel">Editar Trade</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editTradeForm">
+            <input type="hidden" id="editTradeId">
+            <div class="mb-3">
+              <label for="editSolBought" class="form-label">SOL Comprados</label>
+              <input type="number" class="form-control" id="editSolBought" step="any" required>
+            </div>
+            <div class="mb-3">
+              <label for="editSolSold" class="form-label">SOL Vendidos</label>
+              <input type="number" class="form-control" id="editSolSold" step="any" required>
+            </div>
+            <div class="mb-3">
+              <label for="editFee" class="form-label">Fee (SOL)</label>
+              <input type="number" class="form-control" id="editFee" step="any" required>
+            </div>
+            <div class="mb-3">
+              <label for="editRoyalties" class="form-label">Royalties (SOL)</label>
+              <input type="number" class="form-control" id="editRoyalties" step="any" required>
+            </div>
+            <div class="mb-3">
+              <label for="editNote" class="form-label">Nota</label>
+              <input type="text" class="form-control" id="editNote">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-custom" id="saveEditTrade">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Balance Modal -->
+  <div class="modal fade" id="balanceModal" tabindex="-1" aria-labelledby="balanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="balanceModalLabel">Establecer Balance Inicial</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="balanceForm">
+            <div class="mb-3">
+              <label for="balanceInput" class="form-label">
+                Ingrese el balance inicial (<span id="balanceCurrencyLabel">USD</span>)
+              </label>
+              <input type="number" step="any" class="form-control" id="balanceInput" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-custom" id="saveBalanceBtn">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Configuración de Fee y Royalties -->
+  <div class="modal fade" id="feesModal" tabindex="-1" aria-labelledby="feesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="feesModalLabel">Configuración de Fee y Royalties</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="feesForm">
+            <div class="mb-3">
+              <label for="defaultFee" class="form-label">Fee por Trade (SOL)</label>
+              <input type="number" step="any" class="form-control" id="defaultFee" required>
+            </div>
+            <div class="mb-3">
+              <label for="defaultRoyalties" class="form-label">Royalties por Trade (SOL)</label>
+              <input type="number" step="any" class="form-control" id="defaultRoyalties" required>
+            </div>
+          </form>
+          <div class="alert alert-info mt-3">
+            <small>
+              Estos valores se aplicarán automáticamente a todos los nuevos trades.
+              Los valores actuales son: <br>
+              Fee: <span id="currentFee">0</span> SOL | 
+              Royalties: <span id="currentRoyalties">0</span> SOL
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-custom" id="saveFeesBtn">Guardar Configuración</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">Iniciar Sesión</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="loginForm">
+            <div class="mb-3">
+              <label class="form-label">Usuario</label>
+              <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" class="form-control" id="password" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="loginBtn">Iniciar Sesión</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle JS (con Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // --- VARIABLES GLOBALES ---
+    let tradeIdCounter = 0;  // Identificador único para cada trade
+    let livePrices = { SOL: null };
+    let tradesData = []; // Array con todos los trades
+    let initialBalance = parseFloat(localStorage.getItem('initialBalance')) || 0;
+    let currentCurrency = localStorage.getItem('currentCurrency') || "USD";
+    let defaultFee = parseFloat(localStorage.getItem('defaultFee')) || 0;
+    let defaultRoyalties = parseFloat(localStorage.getItem('defaultRoyalties')) || 0;
+
+    // --- FUNCIONES PARA PERSISTENCIA EN LOCALSTORAGE ---
+    function saveTradesData() {
+      localStorage.setItem('tradesData', JSON.stringify(tradesData));
+    }
+
+    function loadTradesData() {
+      const stored = localStorage.getItem('tradesData');
+      if (stored) {
+        tradesData = JSON.parse(stored);
+        tradeIdCounter = tradesData.reduce((max, trade) => Math.max(max, trade.id), 0) + 1;
+      }
+    }
+
+    // Cargar valores por defecto al iniciar
+    function loadDefaultValues() {
+      const storedFee = localStorage.getItem('defaultFee');
+      const storedRoyalties = localStorage.getItem('defaultRoyalties');
+      if(storedFee) {
+        document.getElementById('defaultFee').value = storedFee;
+        document.getElementById('fee').value = storedFee;
+      }
+      if(storedRoyalties) {
+        document.getElementById('defaultRoyalties').value = storedRoyalties;
+        document.getElementById('royalties').value = storedRoyalties;
+      }
+    }
+
+    // Cargar trades al iniciar
+    loadTradesData();
+
+    // --- CHART.JS ---
+    let pnlChart;
+    function initChart() {
+      const ctx = document.getElementById('pnlChart').getContext('2d');
+      pnlChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'PNL Acumulado',
+            data: [],
+            borderColor: '#00ff88',
+            backgroundColor: (context) => {
+              const chart = context.chart;
+              const {ctx, chartArea} = chart;
+              if (!chartArea) return null;
+              const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+              gradient.addColorStop(0, 'rgba(0, 255, 136, 0)');
+              gradient.addColorStop(1, 'rgba(0, 255, 136, 0.2)');
+              return gradient;
+            },
+            tension: 0.4,
+            fill: true,
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 8,
+            pointHoverBorderWidth: 2,
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#00ff88'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              left: 15,
+              right: 15,
+              top: 15,
+              bottom: 15
+            }
+          },
+          elements: {
+            line: {
+              borderWidth: 2
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              padding: 12,
+              displayColors: false,
+              callbacks: {
+                label: function(context) {
+                  let value = context.parsed.y;
+                  return currentCurrency === 'USD' 
+                    ? `$ ${value.toFixed(2)}`
+                    : `${value.toFixed(4)} SOL`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              position: 'right',
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)',
+                drawBorder: false
+              },
+              ticks: {
+                color: '#999',
+                font: {
+                  size: 11
+                },
+                padding: 10,
+                callback: function(value) {
+                  return currentCurrency === 'USD'
+                    ? `$${value.toFixed(2)}`
+                    : `${value.toFixed(4)}`;
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#999',
+                font: {
+                  size: 11
+                },
+                maxRotation: 0,
+                maxTicksLimit: 8,
+                padding: 10
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // --- FUNCIONES DE ACTUALIZACIÓN ---
+    async function fetchLivePrices() {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd', {
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        if (!data.solana || !data.solana.usd) {
+          throw new Error('Invalid data format');
+        }
+        livePrices.SOL = data.solana.usd;
+        document.getElementById('sol-usd').textContent = `SOL/USD: $${livePrices.SOL.toLocaleString()}`;
+        renderTradesTable();
+        updateSummaryStats();
+        updateChart();
+      } catch (error) {
+        console.error('Error fetching live price:', error);
+        document.getElementById('sol-usd').textContent = 'Error cargando precio';
+        // Reintentar en 5 segundos
+        setTimeout(fetchLivePrices, 5000);
+      }
+    }
+
+    // Renderizar la tabla de trades con filtrado de búsqueda
+    function renderTradesTable() {
+      const tradesTable = document.getElementById('tradesTable');
+      tradesTable.innerHTML = "";
+      // Ordenar por fecha
+      tradesData.sort((a, b) => new Date(a.date) - new Date(b.date));
+      let filterText = document.getElementById('searchTrade').value.toLowerCase();
+      const filteredTrades = tradesData.filter(trade => {
+        return (
+          trade.date.toLowerCase().includes(filterText) ||
+          (trade.note && trade.note.toLowerCase().includes(filterText)) ||
+          (trade.profitUSD > 0 && "profit".includes(filterText)) ||
+          (trade.profitUSD < 0 && "loss".includes(filterText)) ||
+          (trade.profitUSD === 0 && "neutral".includes(filterText))
+        );
+      filteredTrades.forEach(trade => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-id', trade.id);
+        row.setAttribute('data-coins-made', trade.coinsMade);
+        let profitStr = "";
+        if(currentCurrency === "USD"){
+            profitStr = "$" + trade.profitUSD.toFixed(2);
+        } else {
+            profitStr = trade.coinsMade.toFixed(4) + " SOL";
+        }
+        row.innerHTML = `
+          <td>${trade.date}</td>
+          <td>${trade.coinName}</td>
+          <td>${trade.solBought}</td>
+          <td>${trade.solSold}</td>
+          <td>${trade.fee}</td>
+          <td>${trade.royalties}</td>
+          <td>${trade.coinsMade.toFixed(4)}</td>
+          <td class="profit-usd">${profitStr}</td>
+          <td class="status-cell ${(trade.profitUSD > 0) ? 'status-profit' : trade.profitUSD < 0 ? 'status-loss' : 'status-neutral'}">
+            ${trade.profitUSD > 0 ? "📈 Profit" : (trade.profitUSD < 0 ? "📉 Loss" : "Neutral")}
+          </td>
+          <td>${trade.note}</td>
+          <td class="actions">
+            <button class="btn btn-sm btn-outline-light btn-edit" onclick="editTrade(${trade.id})">Edit</button>
+            <button class="btn btn-sm btn-outline-light btn-delete" onclick="deleteTrade(${trade.id})">Delete</button>
+          </td>
+        `;
+        tradesTable.appendChild(row);
+      });
+    }
+
+    function updateChart() {
+      if (!pnlChart) return;
+
+      const labels = [];
+      const data = [];
+      let acumulado = 0;
+
+      tradesData.forEach(trade => {
+        if(currentCurrency === "USD") {
+          acumulado += trade.profitUSD;
+        } else {
+          acumulado += trade.coinsMade;
+        }
+        labels.push(trade.date);
+        data.push(acumulado);
+      });
+
+      pnlChart.data.labels = labels;
+      pnlChart.data.datasets[0].data = data;
+      
+      const finalValue = data.length ? data[data.length - 1] : 0;
+      if(finalValue > 0) {
+        pnlChart.data.datasets[0].borderColor = '#00ff88';
+        pnlChart.data.datasets[0].pointHoverBorderColor = '#00ff88';
+      } else if(finalValue < 0) {
+        pnlChart.data.datasets[0].borderColor = '#ff4976';
+        pnlChart.data.datasets[0].pointHoverBorderColor = '#ff4976';
+      }
+
+      pnlChart.update();
+    }
+
+    function updateSummaryStats() {
+      let wins = 0, losses = 0;
+      let totalProfitVal = 0;
+      let bestTrade = -Infinity, worstTrade = Infinity;
+      tradesData.forEach(trade => {
+        if(currentCurrency === "USD"){
+          totalProfitVal += trade.profitUSD;
+          if (trade.profitUSD > 0) wins++;
+          else if (trade.profitUSD < 0) losses++;
+          if(trade.profitUSD > bestTrade) bestTrade = trade.profitUSD;
+          if(trade.profitUSD < worstTrade) worstTrade = trade.profitUSD;
+        } else {
+          totalProfitVal += trade.coinsMade;
+          if (trade.coinsMade > 0) wins++;
+          else if (trade.coinsMade < 0) losses++;
+          if(trade.coinsMade > bestTrade) bestTrade = trade.coinsMade;
+          if(trade.coinsMade < worstTrade) worstTrade = trade.coinsMade;
+        }
+      });
+      const totalTrades = tradesData.length;
+      let avgProfitVal = totalTrades > 0 ? (totalProfitVal / totalTrades) : 0;
+      let hitrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) : "0.00";
+      document.getElementById('totalTrades').textContent = totalTrades;
+      if(currentCurrency === "USD"){
+         document.getElementById('totalProfit').textContent = "$" + totalProfitVal.toFixed(2);
+         document.getElementById('avgProfit').textContent = "$" + avgProfitVal.toFixed(2);
+         let balance = initialBalance + totalProfitVal;
+         document.getElementById('balanceValue').textContent = "$" + balance.toFixed(2);
+      } else {
+         document.getElementById('totalProfit').textContent = totalProfitVal.toFixed(4) + " SOL";
+         document.getElementById('avgProfit').textContent = avgProfitVal.toFixed(4) + " SOL";
+         let balance = initialBalance + totalProfitVal;
+         document.getElementById('balanceValue').textContent = balance.toFixed(4) + " SOL";
+      }
+      document.getElementById('winsCount').textContent = wins;
+      document.getElementById('lossesCount').textContent = losses;
+      document.getElementById('hitrateValue').textContent = `${hitrate}%`;
+
+      const bestWorstEl = document.getElementById('bestWorst');
+      bestWorstEl.innerHTML = "";
+      bestWorstEl.classList.remove("pulse-green", "pulse-red");
+      if(totalTrades > 0) {
+        if(bestTrade > 0) {
+          bestWorstEl.classList.add("pulse-green");
+        } else if(worstTrade < 0) {
+          bestWorstEl.classList.add("pulse-red");
+        } else {
+          bestWorstEl.style.backgroundColor = "transparent";
+          bestWorstEl.style.border = "none";
+        }
+      } else {
+        bestWorstEl.style.backgroundColor = "transparent";
+        bestWorstEl.style.border = "none";
+      }
+    }
+
+    function deleteTrade(id) {
+      if(confirm("¿Está seguro de eliminar este trade?")) {
+        tradesData = tradesData.filter(trade => trade.id !== id);
+        renderTradesTable();
+        updateSummaryStats();
+        updateChart();
+        saveTradesData();
+      }
+    }
+
+    // Función para editar un trade mediante el modal
+    function editTrade(id) {
+      const trade = tradesData.find(trade => trade.id === id);
+      if(trade) {
+        document.getElementById('editTradeId').value = trade.id;
+        document.getElementById('editSolBought').value = trade.solBought;
+        document.getElementById('editSolSold').value = trade.solSold;
+        document.getElementById('editFee').value = trade.fee;
+        document.getElementById('editRoyalties').value = trade.royalties;
+        document.getElementById('editNote').value = trade.note;
+        var editModal = new bootstrap.Modal(document.getElementById('editTradeModal'));
+        editModal.show();
+      }
+    }
+
+    // Manejar el envío del formulario para agregar un trade
+    document.getElementById('tradeForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const trade = {
+        id: tradeIdCounter++,
+        date: document.getElementById('tradeDate').value,
+        coinName: document.getElementById('coinName').value,
+        solBought: parseFloat(document.getElementById('solBought').value),
+        solSold: parseFloat(document.getElementById('solSold').value),
+        fee: parseFloat(localStorage.getItem('defaultFee')) || 0,
+        royalties: parseFloat(localStorage.getItem('defaultRoyalties')) || 0,
+        note: document.getElementById('note').value
+      };
+      
+      trade.coinsMade = (trade.solSold - trade.solBought) - trade.fee - trade.royalties;
+      trade.profitUSD = livePrices.SOL ? trade.coinsMade * livePrices.SOL : 0;
+      tradesData.push(trade);
+      
+      // Limpiar solo los campos necesarios, manteniendo fee y royalties
+      document.getElementById('coinName').value = '';
+      document.getElementById('solBought').value = '';
+      document.getElementById('solSold').value = '';
+      document.getElementById('note').value = '';
+      setCurrentDate();
+      updateFeesDisplay();  // Actualizar displays de fee y royalties
+      renderTradesTable();
+      updateSummaryStats();
+      updateChart();
+      saveTradesData();
+    });
+
+    // Guardar cambios del trade editado desde el modal
+    document.getElementById('saveEditTrade').addEventListener('click', function() {
+      const id = parseInt(document.getElementById('editTradeId').value);
+      const trade = tradesData.find(trade => trade.id === id);
+      if(trade) {
+        trade.solBought = parseFloat(document.getElementById('editSolBought').value);
+        trade.solSold = parseFloat(document.getElementById('editSolSold').value);
+        trade.fee = parseFloat(document.getElementById('editFee').value);
+        trade.royalties = parseFloat(document.getElementById('editRoyalties').value);
+        trade.note = document.getElementById('editNote').value;
+        trade.coinsMade = (trade.solSold - trade.solBought) - trade.fee - trade.royalties;
+        trade.profitUSD = livePrices.SOL ? trade.coinsMade * livePrices.SOL : 0;
+        renderTradesTable();
+        updateSummaryStats();
+        updateChart();
+        saveTradesData();
+        var editModalEl = document.getElementById('editTradeModal');
+        var modalInstance = bootstrap.Modal.getInstance(editModalEl);
+        modalInstance.hide();
+      }
+    });
+
+    // Eventos para el filtro de búsqueda
+    document.getElementById('searchTrade').addEventListener('input', renderTradesTable);
+    document.getElementById('clearSearch').addEventListener('click', function() {
+      document.getElementById('searchTrade').value = "";
+      renderTradesTable();
+    });
+
+    // Exportar el historial a CSV
+    document.getElementById('exportCSV').addEventListener('click', function() {
+      const csvHeader = "Fecha,Moneda,SOL Comprados,SOL Vendidos,Fee,Royalties,COINS MADE,Profit in USD,Status,Nota\n";
+      let csvRows = tradesData.map(trade => {
+        const status = trade.profitUSD > 0 ? "Profit" : trade.profitUSD < 0 ? "Loss" : "Neutral";
+        return `${trade.date},${trade.coinName},${trade.solBought},${trade.solSold},${trade.fee},${trade.royalties},${trade.coinsMade.toFixed(4)},${trade.profitUSD.toFixed(2)},${status},${trade.note}`;
+      });
+      const csvString = csvHeader + csvRows.join("\n");
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "trades_history.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    // --- INICIALIZACIÓN DE PARTICLES.JS ---
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": "#ffffff" },
+        "shape": { "type": "circle", "stroke": { "width": 0, "color": "#000000" } },
+        "opacity": { "value": 0.5, "random": false },
+        "size": { "value": 3, "random": true },
+        "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+        "move": { "enable": true, "speed": 6, "direction": "none", "random": false, "straight": false, "out_mode": "out" }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
+        "modes": { "repulse": { "distance": 200, "duration": 0.4 } }
+      },
+      "retina_detect": true
+    });
+
+    // Función para establecer la fecha actual en el formulario
+    function setCurrentDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('tradeDate').value = today;
+    }
+
+    // Inicialización al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verificar si existen valores de fee y royalties guardados
+      const savedFee = localStorage.getItem('defaultFee');
+      const savedRoyalties = localStorage.getItem('defaultRoyalties');
+      
+      // Si no hay valores guardados, mostrar el modal de configuración
+      if (!savedFee || !savedRoyalties) {
+        setTimeout(() => {
+          alert('Por favor, configure los valores de Fee y Royalties antes de comenzar');
+          new bootstrap.Modal(document.getElementById('feesModal')).show();
+        }, 1000);
+      }
+      
+      initChart();
+      setCurrentDate();
+      loadTradesData();
+      updateSummaryStats();
+      renderTradesTable();
+      updateChart();
+      fetchLivePrices();
+      setInterval(fetchLivePrices, 60000);
+      
+      // Establecer el texto inicial del botón de cambio de moneda
+      const chartCurrencyBtn = document.getElementById('toggleChartCurrency');
+      chartCurrencyBtn.textContent = currentCurrency === "USD" ? "Cambiar a SOL" : "Cambiar a USD";
+      document.getElementById('chartTitle').textContent = `PNL Acumulado (${currentCurrency})`;
+      updateFeesDisplay();
+    });
+
+    // Listener para establecer o cambiar el balance inicial mediante modal
+    document.getElementById('setBalanceBtn').addEventListener('click', function() {
+      // Prellenar el input con el valor actual del balance
+      document.getElementById('balanceInput').value = initialBalance;
+      // Actualizar la etiqueta de moneda en el modal
+      document.getElementById('balanceCurrencyLabel').textContent = currentCurrency;
+      // Mostrar el modal
+      new bootstrap.Modal(document.getElementById('balanceModal')).show();
+    });
+
+    // Listener para alternar la visualización entre USD y SOL
+    document.getElementById('toggleCurrency').addEventListener('click', function() {
+      if (livePrices.SOL) {
+        // Convertir el balance inicial al cambiar la moneda:
+        if(currentCurrency === "USD") {
+          // Convertir de USD a SOL (dividir por el precio de SOL)
+          initialBalance = initialBalance / livePrices.SOL;
+        } else {
+          // Convertir de SOL a USD (multiplicar por el precio de SOL)
+          initialBalance = initialBalance * livePrices.SOL;
+        }
+      }
+      // Toggle entre USD y SOL
+      currentCurrency = (currentCurrency === "USD" ? "SOL" : "USD");
+      localStorage.setItem('currentCurrency', currentCurrency);
+      // Actualizar el texto del botón toggle
+      document.getElementById("toggleCurrency").textContent = currentCurrency === "USD" ? "Ver en SOL" : "Ver en USD";
+      // Actualizar el encabezado de la columna profit
+      document.getElementById("profitHeader").textContent = currentCurrency === "USD" ? "Profit in USD" : "Profit (SOL)";
+      // Actualizar la etiqueta de moneda del modal de balance
+      document.getElementById("balanceCurrencyLabel").textContent = currentCurrency;
+      updateSummaryStats();
+      renderTradesTable();
+      updateChart();
+    });
+
+    // Listener para reiniciar el dashboard (limpiar datos almacenados)
+    document.getElementById('resetDashboard').addEventListener('click', function() {
+      if (confirm("¿Está seguro que desea reiniciar el dashboard? Se borrarán TODOS los datos almacenados.")) {
+        // Eliminar datos de localStorage
+        localStorage.removeItem('tradesData');
+        localStorage.removeItem('initialBalance');
+        localStorage.removeItem('defaultFee');
+        localStorage.removeItem('defaultRoyalties');
+        localStorage.removeItem('currentCurrency');
+
+        // Reiniciar variables globales
+        tradesData = [];
+        tradeIdCounter = 0;
+        initialBalance = 0;
+        currentCurrency = "USD";
+
+        // Reiniciar interfaz: boton toggle, busqueda, y actualizar el dashboard
+        document.getElementById("toggleCurrency").textContent = "Ver en SOL";
+        document.getElementById('searchTrade').value = "";
+        updateSummaryStats();
+        renderTradesTable();
+        updateChart();
+      }
+    });
+
+    // Guardar el nuevo balance desde el modal
+    document.getElementById('saveBalanceBtn').addEventListener('click', function() {
+      let newBalance = parseFloat(document.getElementById('balanceInput').value);
+      if (!isNaN(newBalance)) {
+         initialBalance = newBalance;
+         localStorage.setItem('initialBalance', initialBalance);
+         updateSummaryStats();
+         // Ocultar el modal
+         bootstrap.Modal.getInstance(document.getElementById('balanceModal')).hide();
+      }
+    });
+
+    // Listener para cambiar la moneda del gráfico
+    document.getElementById('toggleChartCurrency').addEventListener('click', function() {
+      const button = this;
+      if (currentCurrency === "USD") {
+        currentCurrency = "SOL";
+        button.textContent = "Cambiar a USD";
+        document.getElementById('chartTitle').textContent = "PNL Acumulado (SOL)";
+      } else {
+        currentCurrency = "USD";
+        button.textContent = "Cambiar a SOL";
+        document.getElementById('chartTitle').textContent = "PNL Acumulado (USD)";
+      }
+      localStorage.setItem('currentCurrency', currentCurrency);
+      updateChart();
+      updateSummaryStats();
+      renderTradesTable();
+    });
+
+    // Función para actualizar los displays de fee y royalties
+    function updateFeesDisplay() {
+      const fee = parseFloat(localStorage.getItem('defaultFee'));
+      const royalties = parseFloat(localStorage.getItem('defaultRoyalties'));
+      
+      // Solo actualizar si hay valores guardados
+      if (!isNaN(fee)) {
+        document.getElementById('displayFee').value = fee + ' SOL';
+        document.getElementById('currentFee').textContent = fee;
+      }
+      if (!isNaN(royalties)) {
+        document.getElementById('displayRoyalties').value = royalties + ' SOL';
+        document.getElementById('currentRoyalties').textContent = royalties;
+      }
+    }
+
+    // Listener para abrir el modal de configuración
+    document.getElementById('configureFeesBtn').addEventListener('click', function() {
+      const fee = localStorage.getItem('defaultFee');
+      const royalties = localStorage.getItem('defaultRoyalties');
+      
+      if(fee) document.getElementById('defaultFee').value = fee;
+      if(royalties) document.getElementById('defaultRoyalties').value = royalties;
+      
+      new bootstrap.Modal(document.getElementById('feesModal')).show();
+    });
+
+    // Listener para guardar la configuración
+    document.getElementById('saveFeesBtn').addEventListener('click', function() {
+      const fee = parseFloat(document.getElementById('defaultFee').value);
+      const royalties = parseFloat(document.getElementById('defaultRoyalties').value);
+      
+      if(!isNaN(fee) && !isNaN(royalties)) {
+        localStorage.setItem('defaultFee', fee);
+        localStorage.setItem('defaultRoyalties', royalties);
+        updateFeesDisplay();
+        alert('Valores de Fee y Royalties actualizados correctamente');
+        bootstrap.Modal.getInstance(document.getElementById('feesModal')).hide();
+      }
+    });
+
+    // Función para exportar todos los datos
+    function exportAllData() {
+        const data = {
+            tradesData: tradesData,
+            initialBalance: initialBalance,
+            currentCurrency: currentCurrency,
+            defaultFee: parseFloat(localStorage.getItem('defaultFee')),
+            defaultRoyalties: parseFloat(localStorage.getItem('defaultRoyalties'))
+        };
+        
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'trading_data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // Función para importar datos
+    function importData(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                // Actualizar todos los datos
+                tradesData = data.tradesData;
+                initialBalance = data.initialBalance;
+                currentCurrency = data.currentCurrency;
+                localStorage.setItem('defaultFee', data.defaultFee);
+                localStorage.setItem('defaultRoyalties', data.defaultRoyalties);
+                
+                // Guardar en localStorage
+                saveTradesData();
+                localStorage.setItem('initialBalance', initialBalance);
+                localStorage.setItem('currentCurrency', currentCurrency);
+                
+                // Actualizar la interfaz
+                updateFeesDisplay();
+                renderTradesTable();
+                updateSummaryStats();
+                updateChart();
+                
+                alert('Datos importados correctamente');
+            } catch (error) {
+                alert('Error al importar datos');
+                console.error(error);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // Event listeners para los nuevos botones
+    document.getElementById('exportData').addEventListener('click', exportAllData);
+
+    document.getElementById('importData').addEventListener('click', function() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            importData(file);
+        };
+        input.click();
+    });
+  </script>
+</body>
+</html>
