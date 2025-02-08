@@ -478,7 +478,12 @@
       }
     }
 
-    /* Sistema de Notificaciones */
+    /* Nueva animación para desvanecer (fade out) */
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
     .notification-container {
       position: fixed;
       top: 20px;
@@ -534,6 +539,22 @@
     .stats-card.balance-card button {
       margin-top: auto;
     }
+
+    /* Clases para profit positivo/negativo */
+    .profit-positive {
+      color: #4caf50;
+      font-weight: bold;
+    }
+    .profit-negative {
+      color: #f44336;
+      font-weight: bold;
+    }
+    
+    /* Clase para separar cada dato del resumen */
+    .summary-field {
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
   </style>
 </head>
 <body>
@@ -558,7 +579,6 @@
     <div class="glass performance-summary animate__animated animate__fadeInUp">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="m-0">Resumen de Rendimiento</h3>
-        <button id="toggleCurrency" class="btn btn-outline-light btn-sm">Ver en SOL</button>
       </div>
       <div class="row justify-content-center">
         <div class="col-lg">
@@ -1134,7 +1154,6 @@
     }
 
     function updateSummaryStats() {
-      // Si no hay precio actual, usar el último precio válido
       if (!livePrices.SOL) {
         const lastValidPrice = parseFloat(localStorage.getItem('lastValidPrice'));
         if (lastValidPrice) {
@@ -1149,11 +1168,7 @@
       let bestTrade = -Infinity, worstTrade = Infinity;
       
       tradesData.forEach(trade => {
-        if(currentCurrency === "USD") {
-          totalProfitVal += trade.profitUSD;
-        } else {
-          totalProfitVal += trade.coinsMade;
-        }
+        totalProfitVal += trade.profitUSD;
         if (trade.profitUSD > 0) wins++;
         else if (trade.profitUSD < 0) losses++;
         if(trade.profitUSD > bestTrade) bestTrade = trade.profitUSD;
@@ -1161,23 +1176,47 @@
       });
       
       const totalTrades = tradesData.length;
-      let avgProfitVal = 0, hitrate = "0.00";
+      let avgProfitVal = totalTrades > 0 ? (totalProfitVal / totalTrades) : 0;
+      let hitrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) : "0.00";
       
-      avgProfitVal = totalTrades > 0 ? (totalProfitVal / totalTrades) : 0;
-      hitrate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(2) : "0.00";
-      
-      if(currentCurrency === "USD") {
-        document.getElementById('totalProfit').textContent = "$" + totalProfitVal.toFixed(2);
-        document.getElementById('avgProfit').textContent = "$" + avgProfitVal.toFixed(2);
-        let balance = initialBalance;
-        balance += totalProfitVal;
-        document.getElementById('balanceValue').textContent = "$" + balance.toFixed(2);
+      if (livePrices.SOL) {
+        // Calcular conversiones
+        const totalProfitUSD = totalProfitVal;
+        const totalProfitSOL = totalProfitUSD / livePrices.SOL;
+        
+        const avgProfitUSD = avgProfitVal;
+        const avgProfitSOL = avgProfitUSD / livePrices.SOL;
+        
+        const balanceUSD = initialBalance + totalProfitUSD;
+        const balanceSOL = balanceUSD / livePrices.SOL;
+        
+        // Elegir icono y clase según el signo del profit total
+        const profitIcon = totalProfitUSD >= 0 ? "▲" : "▼";
+        const profitClass = totalProfitUSD >= 0 ? "profit-positive" : "profit-negative";
+        
+        // Actualizar los elementos sin duplicar etiquetas
+        document.getElementById('totalProfit').innerHTML =
+          `<span class="${profitClass}">$${totalProfitUSD.toFixed(2)} ${profitIcon}</span> (${totalProfitSOL.toFixed(4)} SOL)`;
+        
+        document.getElementById('avgProfit').textContent =
+          `$${avgProfitUSD.toFixed(2)} (${avgProfitSOL.toFixed(4)} SOL)`;
+        
+        document.getElementById('balanceValue').textContent =
+          `$${balanceUSD.toFixed(2)} (${balanceSOL.toFixed(4)} SOL)`;
       } else {
-        document.getElementById('totalProfit').textContent = totalProfitVal.toFixed(4) + " SOL";
-        document.getElementById('avgProfit').textContent = avgProfitVal.toFixed(4) + " SOL";
-        let balance = currentCurrency === "USD" ? initialBalance / livePrices.SOL : initialBalance;
-        balance += totalProfitVal;
-        document.getElementById('balanceValue').textContent = balance.toFixed(4) + " SOL";
+        // Si no hay precio de SOL disponible, mostrar solo USD
+        const profitIcon = totalProfitVal >= 0 ? "▲" : "▼";
+        const profitClass = totalProfitVal >= 0 ? "profit-positive" : "profit-negative";
+        
+        document.getElementById('totalProfit').innerHTML =
+          `<span class="${profitClass}">$${totalProfitVal.toFixed(2)} ${profitIcon}</span>`;
+        
+        document.getElementById('avgProfit').textContent =
+          `$${avgProfitVal.toFixed(2)}`;
+        
+        let balance = initialBalance + totalProfitVal;
+        document.getElementById('balanceValue').textContent =
+          `$${balance.toFixed(2)}`;
       }
       
       document.getElementById('totalTrades').textContent = totalTrades;
@@ -1189,14 +1228,14 @@
       bestWorstEl.innerHTML = "";
       bestWorstEl.classList.remove("pulse-green", "pulse-red");
       if(totalTrades > 0) {
-          if(totalProfitVal > 0) {
-              bestWorstEl.classList.add("pulse-green");
-          } else if(totalProfitVal < 0) {
-              bestWorstEl.classList.add("pulse-red");
-          } else {
-              bestWorstEl.style.backgroundColor = "transparent";
-              bestWorstEl.style.border = "none";
-          }
+        if(totalProfitVal > 0) {
+          bestWorstEl.classList.add("pulse-green");
+        } else if(totalProfitVal < 0) {
+          bestWorstEl.classList.add("pulse-red");
+        } else {
+          bestWorstEl.style.backgroundColor = "transparent";
+          bestWorstEl.style.border = "none";
+        }
       }
     }
 
@@ -1377,9 +1416,8 @@
       };
       
       document.getElementById('confirmReset').onclick = function() {
-        // Borrar todo el localStorage y recargar la página para reiniciar el dashboard
         localStorage.clear();
-        modal.style.animation = 'slideOut 0.5s forwards';
+        modal.style.animation = 'fadeOut 0.5s forwards';
         setTimeout(() => {
           document.body.removeChild(modal);
           showNotification('✅ Dashboard reiniciado correctamente', 'success');
@@ -1472,33 +1510,6 @@
       }
     });
 
-    // Listener para alternar la visualización entre USD y SOL
-    document.getElementById('toggleCurrency').addEventListener('click', function() {
-      // Alternar el modo de moneda
-      currentCurrency = (currentCurrency === "USD" ? "SOL" : "USD");
-      localStorage.setItem('currentCurrency', currentCurrency);
-      
-      // Actualizar botón y textos
-      document.getElementById("toggleCurrency").textContent = currentCurrency === "USD" ? "Ver en SOL" : "Ver en USD";
-      document.getElementById("profitHeader").textContent = currentCurrency === "USD" ? "Profit in USD" : "Profit (SOL)";
-      document.getElementById("balanceCurrencyLabel").textContent = currentCurrency;
-      
-      // Actualizar la configuración de formato de precios en la gráfica
-      if(baselineSeries) {
-        baselineSeries.applyOptions({
-          priceFormat: {
-            type: 'price',
-            precision: currentCurrency === 'USD' ? 2 : 4,
-            minMove: currentCurrency === 'USD' ? 0.01 : 0.0001
-          }
-        });
-      }
-      
-      updateSummaryStats();
-      renderTradesTable();
-      updateChart();
-    });
-
     function initializeApp() {
       // Inicializar particles.js primero
       particlesJS("particles-js", {
@@ -1565,30 +1576,6 @@
       
       updateFeesDisplay();
       setCurrentDate();
-
-      // Configurar el listener para alternar moneda
-      document.getElementById('toggleCurrency').addEventListener('click', function() {
-        currentCurrency = (currentCurrency === "USD" ? "SOL" : "USD");
-        localStorage.setItem('currentCurrency', currentCurrency);
-        
-        document.getElementById("toggleCurrency").textContent = currentCurrency === "USD" ? "Ver en SOL" : "Ver en USD";
-        document.getElementById("profitHeader").textContent = currentCurrency === "USD" ? "Profit in USD" : "Profit (SOL)";
-        document.getElementById("balanceCurrencyLabel").textContent = currentCurrency;
-        
-        if(baselineSeries) {
-          baselineSeries.applyOptions({
-            priceFormat: {
-              type: 'price',
-              precision: currentCurrency === 'USD' ? 2 : 4,
-              minMove: currentCurrency === 'USD' ? 0.01 : 0.0001
-            }
-          });
-        }
-        
-        updateSummaryStats();
-        renderTradesTable();
-        updateChart();
-      });
     }
 
     // Nueva función: recalcular las ganancias de cada trade usando el precio actual
