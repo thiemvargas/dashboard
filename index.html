@@ -811,6 +811,7 @@
           (trade.profitUSD < 0 && "loss".includes(filterText)) ||
           (trade.profitUSD === 0 && "neutral".includes(filterText))
         );
+      });
       filteredTrades.forEach(trade => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', trade.id);
@@ -1221,74 +1222,7 @@
         bootstrap.Modal.getInstance(document.getElementById('feesModal')).hide();
       }
     });
-
-    // Función para exportar todos los datos
-    function exportAllData() {
-        const data = {
-            tradesData: tradesData,
-            initialBalance: initialBalance,
-            currentCurrency: currentCurrency,
-            defaultFee: parseFloat(localStorage.getItem('defaultFee')),
-            defaultRoyalties: parseFloat(localStorage.getItem('defaultRoyalties'))
-        };
-        
-        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'trading_data.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-
-    // Función para importar datos
-    function importData(file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                
-                // Actualizar todos los datos
-                tradesData = data.tradesData;
-                initialBalance = data.initialBalance;
-                currentCurrency = data.currentCurrency;
-                localStorage.setItem('defaultFee', data.defaultFee);
-                localStorage.setItem('defaultRoyalties', data.defaultRoyalties);
-                
-                // Guardar en localStorage
-                saveTradesData();
-                localStorage.setItem('initialBalance', initialBalance);
-                localStorage.setItem('currentCurrency', currentCurrency);
-                
-                // Actualizar la interfaz
-                updateFeesDisplay();
-                renderTradesTable();
-                updateSummaryStats();
-                updateChart();
-                
-                alert('Datos importados correctamente');
-            } catch (error) {
-                alert('Error al importar datos');
-                console.error(error);
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    // Event listeners para los nuevos botones
-    document.getElementById('exportData').addEventListener('click', exportAllData);
-
-    document.getElementById('importData').addEventListener('click', function() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = e => {
-            const file = e.target.files[0];
-            importData(file);
-        };
-        input.click();
-    });
   </script>
 </body>
 </html>
+
